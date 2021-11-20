@@ -4,9 +4,8 @@ on:
   push:
     branches:
       - main
-      - protocol_and_cats_rebased
     tags:
-      - '**'
+        - '**'
   pull_request:
     branches:
       - '**'
@@ -24,6 +23,11 @@ jobs:
         os: [macOS-latest]
 
     steps:
+    - name: Reconfigure git to use HTTP authentication
+      run: >
+        git config --global url."https://github.com/".insteadOf
+        ssh://git@github.com/
+
     - name: Cancel previous runs on the same branch
       if: ${{ github.ref != 'refs/heads/main' }}
       uses: styfle/cancel-workflow-action@0.9.1
@@ -88,6 +92,27 @@ jobs:
         p12-file-base64: ${{ secrets.APPLE_DEV_ID_APP }}
         p12-password: ${{ secrets.APPLE_DEV_ID_APP_PASS }}
 
+    # Get the most recent release from chia-plotter-madmax
+    - uses: actions/github-script@v4
+      id: 'latest-madmax'
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        result-encoding: string
+        script: |
+          const releases = await github.repos.listReleases({
+            owner: 'Chia-Network',
+            repo: 'chia-plotter-madmax',
+          });
+          return releases.data[0].tag_name;
+
+    - name: Get latest madmax plotter
+      run: |
+        mkdir "$GITHUB_WORKSPACE/madmax"
+        wget -O "$GITHUB_WORKSPACE/madmax/flax_plot" https://github.com/Chia-Network/chia-plotter-madmax/releases/download/${{ steps.latest-madmax.outputs.result }}/chia_plot-${{ steps.latest-madmax.outputs.result }}-macos-intel
+        wget -O "$GITHUB_WORKSPACE/madmax/flax_plot_k34" https://github.com/Chia-Network/chia-plotter-madmax/releases/download/${{ steps.latest-madmax.outputs.result }}/chia_plot_k34-${{ steps.latest-madmax.outputs.result }}-macos-intel
+        chmod +x "$GITHUB_WORKSPACE/madmax/flax_plot"
+        chmod +x "$GITHUB_WORKSPACE/madmax/flax_plot_k34"
+
     - name: Run install script
       env:
         INSTALL_PYTHON_VERSION: ${{ matrix.python-version }}
@@ -95,10 +120,10 @@ jobs:
       run: |
         sh install.sh
 
-    - name: Setup Node 16.x
+    - name: Setup Node 14.x
       uses: actions/setup-node@v2.4.1
       with:
-        node-version: '16.x'
+        node-version: '14.x'
 
     - name: Build MacOS DMG in Catalina
       env:
@@ -107,7 +132,7 @@ jobs:
         APPLE_NOTARIZE_PASSWORD: "${{ secrets.APPLE_NOTARIZE_PASSWORD }}"
       run: |
         . ./activate
-        cd ./chia-blockchain-gui
+        cd ./flax-blockchain-gui
         git status
         cd ../build_scripts
         sh build_macos.sh
@@ -115,5 +140,5 @@ jobs:
     - name: Upload MacOS artifacts
       uses: actions/upload-artifact@v2
       with:
-        name: Chia-Installer-on-MacOS-10.15-dmg
+        name: Flax-Installer-on-MacOS-10.15-dmg
         path: ${{ github.workspace }}/build_scripts/final_installer/

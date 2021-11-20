@@ -7,11 +7,11 @@ from pathlib import Path
 import aiosqlite
 import pytest
 
-from chia.consensus.blockchain import Blockchain
-from chia.full_node.block_store import BlockStore
-from chia.full_node.coin_store import CoinStore
-from chia.full_node.hint_store import HintStore
-from chia.util.db_wrapper import DBWrapper
+from flaxlight.consensus.blockchain import Blockchain
+from flaxlight.full_node.block_store import BlockStore
+from flaxlight.full_node.coin_store import CoinStore
+from flaxlight.full_node.hint_store import HintStore
+from flaxlight.util.db_wrapper import DBWrapper
 from tests.setup_nodes import bt, test_constants
 
 log = logging.getLogger(__name__)

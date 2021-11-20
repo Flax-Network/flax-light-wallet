@@ -3,18 +3,18 @@ import random
 import secrets
 from time import time
 from pathlib import Path
-from chia.full_node.coin_store import CoinStore
+from flaxlight.full_node.coin_store import CoinStore
 from typing import List, Tuple
 import os
 import sys
 
 import aiosqlite
-from chia.util.db_wrapper import DBWrapper
-from chia.consensus.coinbase import create_farmer_coin, create_pool_coin
-from chia.consensus.default_constants import DEFAULT_CONSTANTS
-from chia.types.blockchain_format.sized_bytes import bytes32
-from chia.types.blockchain_format.coin import Coin
-from chia.util.ints import uint64, uint32
+from flaxlight.util.db_wrapper import DBWrapper
+from flaxlight.consensus.coinbase import create_farmer_coin, create_pool_coin
+from flaxlight.consensus.default_constants import DEFAULT_CONSTANTS
+from flaxlight.types.blockchain_format.sized_bytes import bytes32
+from flaxlight.types.blockchain_format.coin import Coin
+from flaxlight.util.ints import uint64, uint32
 
 
 NUM_ITERS = 200

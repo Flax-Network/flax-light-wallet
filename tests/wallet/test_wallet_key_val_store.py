@@ -3,10 +3,10 @@ from pathlib import Path
 import aiosqlite
 import pytest
 
-from chia.types.full_block import FullBlock
-from chia.types.header_block import HeaderBlock
-from chia.util.db_wrapper import DBWrapper
-from chia.wallet.key_val_store import KeyValStore
+from flaxlight.types.full_block import FullBlock
+from flaxlight.types.header_block import HeaderBlock
+from flaxlight.util.db_wrapper import DBWrapper
+from flaxlight.wallet.key_val_store import KeyValStore
 from tests.setup_nodes import bt
 
 

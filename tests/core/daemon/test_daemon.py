@@ -1,9 +1,9 @@
-from chia.server.outbound_message import NodeType
-from chia.types.peer_info import PeerInfo
+from flaxlight.server.outbound_message import NodeType
+from flaxlight.types.peer_info import PeerInfo
 from tests.block_tools import BlockTools, create_block_tools, create_block_tools_async
-from chia.util.ints import uint16
-from chia.util.keyring_wrapper import DEFAULT_PASSPHRASE_IF_NO_MASTER_PASSPHRASE
-from chia.util.ws_message import create_payload
+from flaxlight.util.ints import uint16
+from flaxlight.util.keyring_wrapper import DEFAULT_PASSPHRASE_IF_NO_MASTER_PASSPHRASE
+from flaxlight.util.ws_message import create_payload
 from tests.core.node_height import node_height_at_least
 from tests.setup_nodes import setup_daemon, self_hostname, setup_full_system
 from tests.simulation.test_simulation import test_constants_modified
@@ -29,7 +29,7 @@ atexit.register(cleanup_keyring, temp_keyring2)
 b_tools = create_block_tools(constants=test_constants_modified, keychain=temp_keyring1.get_keychain())
 b_tools_1 = create_block_tools(constants=test_constants_modified, keychain=temp_keyring2.get_keychain())
 new_config = b_tools._config
-new_config["daemon_port"] = 55401
+new_config["daemon_port"] = 56602
 b_tools.change_config(new_config)
 
 
@@ -55,7 +55,7 @@ class TestDaemon:
     async def get_b_tools(self, get_temp_keyring):
         local_b_tools = await create_block_tools_async(constants=test_constants_modified, keychain=get_temp_keyring)
         new_config = local_b_tools._config
-        new_config["daemon_port"] = 55401
+        new_config["daemon_port"] = 56602
         local_b_tools.change_config(new_config)
         return local_b_tools
 
@@ -80,7 +80,7 @@ class TestDaemon:
         ssl_context = b_tools.get_daemon_ssl_context()
 
         ws = await session.ws_connect(
-            "wss://127.0.0.1:55401",
+            "wss://127.0.0.1:56602",
             autoclose=True,
             autoping=True,
             heartbeat=60,
@@ -116,7 +116,7 @@ class TestDaemon:
 
         read_handler = asyncio.create_task(reader(ws, message_queue))
         data = {}
-        payload = create_payload("get_blockchain_state", data, service_name, "chia_full_node")
+        payload = create_payload("get_blockchain_state", data, service_name, "flaxlight_full_node")
         await ws.send_str(payload)
 
         await asyncio.sleep(5)
@@ -183,7 +183,7 @@ class TestDaemon:
 
         async with aiohttp.ClientSession() as session:
             async with session.ws_connect(
-                "wss://127.0.0.1:55401",
+                "wss://127.0.0.1:56602",
                 autoclose=True,
                 autoping=True,
                 heartbeat=60,

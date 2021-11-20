@@ -11,35 +11,36 @@ import pytest
 from blspy import AugSchemeMPL, G2Element
 from clvm.casts import int_to_bytes
 
-from chia.consensus.block_rewards import calculate_base_farmer_reward
-from chia.consensus.blockchain import ReceiveBlockResult
-from chia.consensus.coinbase import create_farmer_coin
-from chia.consensus.pot_iterations import is_overflow_block
-from chia.full_node.bundle_tools import detect_potential_template_generator
-from chia.types.blockchain_format.classgroup import ClassgroupElement
-from chia.types.blockchain_format.coin import Coin
-from chia.types.blockchain_format.foliage import TransactionsInfo
-from chia.types.blockchain_format.program import SerializedProgram
-from chia.types.blockchain_format.sized_bytes import bytes32
-from chia.types.blockchain_format.slots import InfusedChallengeChainSubSlot
-from chia.types.blockchain_format.vdf import VDFInfo, VDFProof
-from chia.types.condition_opcodes import ConditionOpcode
-from chia.types.condition_with_args import ConditionWithArgs
-from chia.types.end_of_slot_bundle import EndOfSubSlotBundle
-from chia.types.full_block import FullBlock
-from chia.types.spend_bundle import SpendBundle
-from chia.types.unfinished_block import UnfinishedBlock
+from flaxlight.consensus.block_rewards import calculate_base_farmer_reward
+from flaxlight.consensus.blockchain import ReceiveBlockResult
+from flaxlight.consensus.coinbase import create_farmer_coin
+from flaxlight.consensus.pot_iterations import is_overflow_block
+from flaxlight.full_node.bundle_tools import detect_potential_template_generator
+from flaxlight.types.blockchain_format.classgroup import ClassgroupElement
+from flaxlight.types.blockchain_format.coin import Coin
+from flaxlight.types.blockchain_format.foliage import TransactionsInfo
+from flaxlight.types.blockchain_format.program import SerializedProgram
+from flaxlight.types.blockchain_format.sized_bytes import bytes32
+from flaxlight.types.blockchain_format.slots import InfusedChallengeChainSubSlot
+from flaxlight.types.blockchain_format.vdf import VDFInfo, VDFProof
+from flaxlight.types.condition_opcodes import ConditionOpcode
+from flaxlight.types.condition_with_args import ConditionWithArgs
+from flaxlight.types.end_of_slot_bundle import EndOfSubSlotBundle
+from flaxlight.types.full_block import FullBlock
+from flaxlight.types.generator_types import BlockGenerator
+from flaxlight.types.spend_bundle import SpendBundle
+from flaxlight.types.unfinished_block import UnfinishedBlock
 from tests.block_tools import create_block_tools_async, get_vdf_info_and_proof
-from chia.util.errors import Err
-from chia.util.hash import std_hash
-from chia.util.ints import uint8, uint64, uint32
-from chia.util.merkle_set import MerkleSet
-from chia.util.recursive_replace import recursive_replace
+from flaxlight.util.errors import Err
+from flaxlight.util.hash import std_hash
+from flaxlight.util.ints import uint8, uint64, uint32
+from flaxlight.util.merkle_set import MerkleSet
+from flaxlight.util.recursive_replace import recursive_replace
 from tests.wallet_tools import WalletTool
 from tests.setup_nodes import bt, test_constants
 from tests.util.blockchain import create_blockchain
 from tests.util.keyring import TempKeyring
-from chia.wallet.puzzles.p2_delegated_puzzle_or_hidden_puzzle import (
+from flaxlight.wallet.puzzles.p2_delegated_puzzle_or_hidden_puzzle import (
     DEFAULT_HIDDEN_PUZZLE_HASH,
     calculate_synthetic_secret_key,
 )
@@ -211,7 +212,13 @@ class TestBlockHeaderValidation:
             block.transactions_generator,
             [],
         )
-        validate_res = await blockchain.validate_unfinished_block(unf, False)
+        npc_result = None
+        if unf.transactions_generator is not None:
+            block_generator: BlockGenerator = await blockchain.get_block_generator(unf)
+            block_bytes = bytes(unf)
+            npc_result = await blockchain.run_generator(block_bytes, block_generator)
+
+        validate_res = await blockchain.validate_unfinished_block(unf, npc_result, False)
         err = validate_res.error
         assert err is None
         result, err, _, _ = await blockchain.receive_block(block)
@@ -228,7 +235,12 @@ class TestBlockHeaderValidation:
             block.transactions_generator,
             [],
         )
-        validate_res = await blockchain.validate_unfinished_block(unf, False)
+        npc_result = None
+        if unf.transactions_generator is not None:
+            block_generator: BlockGenerator = await blockchain.get_block_generator(unf)
+            block_bytes = bytes(unf)
+            npc_result = await blockchain.run_generator(block_bytes, block_generator)
+        validate_res = await blockchain.validate_unfinished_block(unf, npc_result, False)
         assert validate_res.error is None
 
     @pytest.mark.asyncio
@@ -311,7 +323,14 @@ class TestBlockHeaderValidation:
                     block.transactions_generator,
                     [],
                 )
-                validate_res = await blockchain.validate_unfinished_block(unf, skip_overflow_ss_validation=True)
+                npc_result = None
+                if block.transactions_generator is not None:
+                    block_generator: BlockGenerator = await blockchain.get_block_generator(unf)
+                    block_bytes = bytes(unf)
+                    npc_result = await blockchain.run_generator(block_bytes, block_generator)
+                validate_res = await blockchain.validate_unfinished_block(
+                    unf, npc_result, skip_overflow_ss_validation=True
+                )
                 assert validate_res.error is None
                 return None
 

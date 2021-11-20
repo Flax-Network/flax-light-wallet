@@ -2,9 +2,9 @@ from typing import List
 
 from blspy import AugSchemeMPL, G2Element, PrivateKey
 
-from chia.types.blockchain_format.sized_bytes import bytes32
-from chia.types.coin_spend import CoinSpend
-from chia.util.condition_tools import conditions_by_opcode, conditions_for_solution, pkm_pairs_for_conditions_dict
+from flaxlight.types.blockchain_format.sized_bytes import bytes32
+from flaxlight.types.coin_spend import CoinSpend
+from flaxlight.util.condition_tools import conditions_by_opcode, conditions_for_solution, pkm_pairs_for_conditions_dict
 from tests.core.make_block_generator import GROUP_ORDER, int_to_public_key
 from tests.block_tools import test_constants
 
@@ -35,6 +35,6 @@ class KeyTool(dict):
         for public_key, message_hash in pkm_pairs_for_conditions_dict(
             conditions_dict, coin_spend.coin.name(), additional_data
         ):
-            signature = self.sign(bytes(public_key), message_hash)
+            signature = self.sign(public_key, message_hash)
             signatures.append(signature)
         return AugSchemeMPL.aggregate(signatures)

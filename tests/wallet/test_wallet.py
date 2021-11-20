@@ -1,16 +1,16 @@
 import asyncio
 import pytest
 import time
-from chia.consensus.block_rewards import calculate_base_farmer_reward, calculate_pool_reward
-from chia.protocols.full_node_protocol import RespondBlock
-from chia.server.server import ChiaServer
-from chia.simulator.simulator_protocol import FarmNewBlockProtocol, ReorgProtocol
-from chia.types.peer_info import PeerInfo
-from chia.util.ints import uint16, uint32, uint64
-from chia.wallet.util.transaction_type import TransactionType
-from chia.wallet.transaction_record import TransactionRecord
-from chia.wallet.wallet_node import WalletNode
-from chia.wallet.wallet_state_manager import WalletStateManager
+from flaxlight.consensus.block_rewards import calculate_base_farmer_reward, calculate_pool_reward
+from flaxlight.protocols.full_node_protocol import RespondBlock
+from flaxlight.server.server import FlaxServer
+from flaxlight.simulator.simulator_protocol import FarmNewBlockProtocol, ReorgProtocol
+from flaxlight.types.peer_info import PeerInfo
+from flaxlight.util.ints import uint16, uint32, uint64
+from flaxlight.wallet.util.transaction_type import TransactionType
+from flaxlight.wallet.transaction_record import TransactionRecord
+from flaxlight.wallet.wallet_node import WalletNode
+from flaxlight.wallet.wallet_state_manager import WalletStateManager
 from tests.setup_nodes import self_hostname, setup_simulators_and_wallets
 from tests.time_out_assert import time_out_assert, time_out_assert_not_none
 from tests.wallet.cc_wallet.test_cc_wallet import tx_in_pool
@@ -52,7 +52,7 @@ class TestWalletSimulator:
         num_blocks = 10
         full_nodes, wallets = wallet_node
         full_node_api = full_nodes[0]
-        server_1: ChiaServer = full_node_api.full_node.server
+        server_1: FlaxServer = full_node_api.full_node.server
         wallet_node, server_2 = wallets[0]
 
         wallet = wallet_node.wallet_state_manager.main_wallet
@@ -141,6 +141,7 @@ class TestWalletSimulator:
 
         await time_out_assert(5, wallet.get_confirmed_balance, funds)
         await time_out_assert(5, wallet.get_unconfirmed_balance, funds - 10)
+        await time_out_assert(5, full_node_api.full_node.mempool_manager.get_spendbundle, tx.spend_bundle, tx.name)
 
         for i in range(0, num_blocks):
             await full_node_api.farm_new_transaction_block(FarmNewBlockProtocol(ph))
@@ -302,6 +303,7 @@ class TestWalletSimulator:
 
         await wallet_0.push_transaction(tx)
 
+        await time_out_assert(5, full_node_0.mempool_manager.get_spendbundle, tx.spend_bundle, tx.name)
         # Full node height 11, wallet height 9
         await time_out_assert(5, wallet_0.get_confirmed_balance, funds)
         await time_out_assert(5, wallet_0.get_unconfirmed_balance, funds - 10)
@@ -324,6 +326,7 @@ class TestWalletSimulator:
 
         tx = await wallet_1.generate_signed_transaction(5, await wallet_0.get_new_puzzlehash(), 0)
         await wallet_1.push_transaction(tx)
+        await time_out_assert(5, full_node_0.mempool_manager.get_spendbundle, tx.spend_bundle, tx.name)
 
         for i in range(0, 4):
             await full_node_api_0.farm_new_transaction_block(FarmNewBlockProtocol(32 * b"0"))
@@ -360,7 +363,7 @@ class TestWalletSimulator:
     #     introducer, introducer_server = await node_iters[2].__anext__()
     #
     #     async def has_full_node():
-    #         outbound: List[WSChiaConnection] = wallet.server.get_outgoing_connections()
+    #         outbound: List[WSFlaxConnection] = wallet.server.get_outgoing_connections()
     #         for connection in outbound:
     #             if connection.connection_type is NodeType.FULL_NODE:
     #                 return True
@@ -421,6 +424,7 @@ class TestWalletSimulator:
         assert fees == tx_fee
 
         await wallet.push_transaction(tx)
+        await time_out_assert(5, full_node_1.full_node.mempool_manager.get_spendbundle, tx.spend_bundle, tx.name)
 
         await time_out_assert(5, wallet.get_confirmed_balance, funds)
         await time_out_assert(5, wallet.get_unconfirmed_balance, funds - tx_amount - tx_fee)
@@ -662,6 +666,7 @@ class TestWalletSimulator:
         tx = await wallet.generate_signed_transaction(1000, ph2, coins={coin})
         await wallet.push_transaction(tx)
         await full_node_api.full_node.respond_transaction(tx.spend_bundle, tx.name)
+        await time_out_assert(5, full_node_api.full_node.mempool_manager.get_spendbundle, tx.spend_bundle, tx.name)
         await time_out_assert(5, wallet.get_confirmed_balance, funds)
         for i in range(0, 2):
             await full_node_api.farm_new_transaction_block(FarmNewBlockProtocol(32 * b"0"))

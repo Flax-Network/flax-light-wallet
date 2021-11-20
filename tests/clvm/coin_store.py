@@ -2,16 +2,16 @@ from collections import defaultdict
 from dataclasses import dataclass, replace
 from typing import Dict, Iterator, Optional
 
-from chia.util.condition_tools import created_outputs_for_conditions_dict
-from chia.full_node.mempool_check_conditions import mempool_check_conditions_dict, get_name_puzzle_conditions
-from chia.types.blockchain_format.coin import Coin
-from chia.types.blockchain_format.sized_bytes import bytes32
-from chia.types.coin_record import CoinRecord
-from chia.types.spend_bundle import SpendBundle
-from chia.util.ints import uint32, uint64
-from chia.full_node.bundle_tools import simple_solution_generator
-from chia.util.errors import Err
-from chia.consensus.cost_calculator import NPCResult
+from flaxlight.util.condition_tools import created_outputs_for_conditions_dict
+from flaxlight.full_node.mempool_check_conditions import mempool_check_conditions_dict, get_name_puzzle_conditions
+from flaxlight.types.blockchain_format.coin import Coin
+from flaxlight.types.blockchain_format.sized_bytes import bytes32
+from flaxlight.types.coin_record import CoinRecord
+from flaxlight.types.spend_bundle import SpendBundle
+from flaxlight.util.ints import uint32, uint64
+from flaxlight.full_node.bundle_tools import simple_solution_generator
+from flaxlight.util.errors import Err
+from flaxlight.consensus.cost_calculator import NPCResult
 
 
 MAX_COST = 11000000000

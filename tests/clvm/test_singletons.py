@@ -4,17 +4,17 @@ from typing import List, Tuple, Optional
 
 from blspy import AugSchemeMPL, G1Element, G2Element, PrivateKey
 
-from chia.types.blockchain_format.program import Program
-from chia.types.blockchain_format.sized_bytes import bytes32
-from chia.types.blockchain_format.coin import Coin
-from chia.types.coin_spend import CoinSpend
-from chia.types.spend_bundle import SpendBundle
-from chia.util.errors import Err
-from chia.util.condition_tools import ConditionOpcode
-from chia.util.ints import uint64
-from chia.consensus.default_constants import DEFAULT_CONSTANTS
-from chia.wallet.lineage_proof import LineageProof
-from chia.wallet.puzzles import (
+from flaxlight.types.blockchain_format.program import Program
+from flaxlight.types.blockchain_format.sized_bytes import bytes32
+from flaxlight.types.blockchain_format.coin import Coin
+from flaxlight.types.coin_spend import CoinSpend
+from flaxlight.types.spend_bundle import SpendBundle
+from flaxlight.util.errors import Err
+from flaxlight.util.condition_tools import ConditionOpcode
+from flaxlight.util.ints import uint64
+from flaxlight.consensus.default_constants import DEFAULT_CONSTANTS
+from flaxlight.wallet.lineage_proof import LineageProof
+from flaxlight.wallet.puzzles import (
     p2_conditions,
     p2_delegated_puzzle_or_hidden_puzzle,
     singleton_top_layer,
@@ -25,14 +25,14 @@ from tests.clvm.test_puzzles import (
     secret_exponent_for_index,
 )
 
-from chia.clvm.spend_sim import SpendSim, SimClient
+from flaxlight.clvm.spend_sim import SpendSim, SimClient
 
 """
 This test suite aims to test:
-    - chia.wallet.puzzles.singleton_top_layer.py
-    - chia.wallet.puzzles.singleton_top_layer.clvm
-    - chia.wallet.puzzles.p2_singleton.clvm
-    - chia.wallet.puzzles.p2_singleton_or_delayed_puzhash.clvm
+    - flaxlight.wallet.puzzles.singleton_top_layer.py
+    - flaxlight.wallet.puzzles.singleton_top_layer.clvm
+    - flaxlight.wallet.puzzles.p2_singleton.clvm
+    - flaxlight.wallet.puzzles.p2_singleton_or_delayed_puzhash.clvm
 """
 
 
